@@ -42,6 +42,8 @@ import dotenv from 'dotenv';
 import connectDB from './config/db.js';
 import multer from 'multer';
 import cors from 'cors';
+import crypto from 'crypto';
+import fs from 'fs';
 import authMiddleware from "./middlewares/authMiddleware.js";
 import { date, monPath } from "./middlewares/middleware.js";
 import userRoutes from './routes/userRoutes.js';
@@ -60,7 +62,23 @@ if (!process.env.JWT_SECRET) {
 }
 connectDB();
 const app = express();
-app.use(cors());
+app.use(cors({
+  origin: ['http://localhost:3000', 'http://frontend:80'], // depending on where React is running
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE']
+}));
+app.use(cors({
+  origin: 'http://frontend:80',
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  credentials: true
+}));
+
+app.use((req, res, next) => {
+  console.log("Request from:", req.headers.origin);
+  next();
+});
+
+
 const server = http.createServer(app);
 const port = process.env.PORT;
 initSocket(server);

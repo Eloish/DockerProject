@@ -1,0 +1,42 @@
+version: "3.8"
+
+services:
+  mongo:
+    image: mongo
+    container_name: mongodb
+    restart: always
+    volumes:
+      - mongo-data:/data/db
+    ports:
+      - "27017:27017"
+    networks:
+      - app-network
+
+  backend:
+    build: ./server
+    container_name: express-api
+    restart: always
+    ports:
+      - "5000:5000"
+    environment:
+      - MONGO_URL=mongodb://mongo:27017/mydb
+    networks:
+      - app-network
+
+  frontend:
+    build: ./diary-ipssi
+    container_name: react-app
+    restart: always
+    ports:
+      - "3000:80"
+    networks:
+      - app-network
+    environment:
+    - REACT_APP_API_URL=http://backend:5000
+
+volumes:
+  mongo-data:
+
+networks:
+  app-network:
+    driver: bridge
